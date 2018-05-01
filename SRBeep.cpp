@@ -347,13 +347,21 @@ void stop_record_sound(void)
 
 void obsstudio_srbeep_frontend_event_callback(enum obs_frontend_event event, void *private_data)
 {
-	if (event == OBS_FRONTEND_EVENT_STREAMING_STARTED)
+	if (event == OBS_FRONTEND_EVENT_SCENE_COLLECTION_CLEANUP)
 	{
-		if(st_stt_Thread.joinable())
+		if(rc_stt_Thread.joinable())
 		{
-			st_stt_Thread.join();
+			rc_stt_Thread.join();
 		}
-		st_stt_Thread = std::thread(start_stream_sound);
+		rc_stt_Thread = std::thread(start_record_sound);
+	}
+	else if (event == OBS_FRONTEND_EVENT_REPLAY_BUFFER_STOPPED)
+	{
+		if(rc_stt_Thread.joinable())
+		{
+			rc_stt_Thread.join();
+		}
+		rc_stt_Thread = std::thread(start_record_sound);
 	}
 	else if (event == OBS_FRONTEND_EVENT_RECORDING_STARTED)
 	{
@@ -362,22 +370,6 @@ void obsstudio_srbeep_frontend_event_callback(enum obs_frontend_event event, voi
 			rc_stt_Thread.join();
 		}
 		rc_stt_Thread = std::thread(start_record_sound);
-	}
-	else if (event == OBS_FRONTEND_EVENT_STREAMING_STOPPED)
-	{
-		if(st_sto_Thread.joinable())
-		{
-			st_sto_Thread.join();
-		}
-		st_sto_Thread = std::thread(stop_stream_sound);
-	}
-	else if (event == OBS_FRONTEND_EVENT_RECORDING_STOPPED)
-	{
-		if(rc_sto_Thread.joinable())
-		{
-			rc_sto_Thread.join();
-		}
-		rc_sto_Thread = std::thread(stop_record_sound);
 	}
 }
 
